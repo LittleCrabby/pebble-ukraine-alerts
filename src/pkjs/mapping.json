@@ -1,0 +1,740 @@
+{
+  "states": [
+    "АР Крим",
+    "Вінницька область",
+    "Волинська область",
+    "Дніпропетровська область",
+    "Донецька область",
+    "Житомирська область",
+    "Закарпатська область",
+    "Запорізька область",
+    "Івано-Франківська область",
+    "Київська область",
+    "Кіровоградська область",
+    "Луганська область",
+    "Львівська область",
+    "Миколаївська область",
+    "Одеська область",
+    "Полтавська область",
+    "Рівненська область",
+    "Сумська область",
+    "Тернопільська область",
+    "Харківська область",
+    "Херсонська область",
+    "Хмельницька область",
+    "Черкаська область",
+    "Чернівецька область",
+    "Чернігівська область",
+    "м. Київ"
+  ],
+  "districts": [
+    {
+      "global_id": 0,
+      "state_id": 1,
+      "state_name": "Вінницька область",
+      "district_name": "Вінницький район"
+    },
+    {
+      "global_id": 1,
+      "state_id": 1,
+      "state_name": "Вінницька область",
+      "district_name": "Могилів-Подільський район"
+    },
+    {
+      "global_id": 2,
+      "state_id": 1,
+      "state_name": "Вінницька область",
+      "district_name": "Жмеринський район"
+    },
+    {
+      "global_id": 3,
+      "state_id": 1,
+      "state_name": "Вінницька область",
+      "district_name": "Гайсинський район"
+    },
+    {
+      "global_id": 4,
+      "state_id": 1,
+      "state_name": "Вінницька область",
+      "district_name": "Тульчинський район"
+    },
+    {
+      "global_id": 5,
+      "state_id": 1,
+      "state_name": "Вінницька область",
+      "district_name": "Хмільницький район"
+    },
+    {
+      "global_id": 6,
+      "state_id": 2,
+      "state_name": "Волинська область",
+      "district_name": "Луцький район"
+    },
+    {
+      "global_id": 7,
+      "state_id": 2,
+      "state_name": "Волинська область",
+      "district_name": "Ковельський район"
+    },
+    {
+      "global_id": 8,
+      "state_id": 2,
+      "state_name": "Волинська область",
+      "district_name": "Володимир-Волинський район"
+    },
+    {
+      "global_id": 9,
+      "state_id": 2,
+      "state_name": "Волинська область",
+      "district_name": "Камінь-Каширський район"
+    },
+    {
+      "global_id": 10,
+      "state_id": 3,
+      "state_name": "Дніпропетровська область",
+      "district_name": "Криворізький район"
+    },
+    {
+      "global_id": 11,
+      "state_id": 3,
+      "state_name": "Дніпропетровська область",
+      "district_name": "Павлоградський район"
+    },
+    {
+      "global_id": 12,
+      "state_id": 3,
+      "state_name": "Дніпропетровська область",
+      "district_name": "Кам’янський район"
+    },
+    {
+      "global_id": 13,
+      "state_id": 3,
+      "state_name": "Дніпропетровська область",
+      "district_name": "Синельниківський район"
+    },
+    {
+      "global_id": 14,
+      "state_id": 3,
+      "state_name": "Дніпропетровська область",
+      "district_name": "Новомосковський район"
+    },
+    {
+      "global_id": 15,
+      "state_id": 3,
+      "state_name": "Дніпропетровська область",
+      "district_name": "Дніпровський район"
+    },
+    {
+      "global_id": 16,
+      "state_id": 3,
+      "state_name": "Дніпропетровська область",
+      "district_name": "Нікопольський район"
+    },
+    {
+      "global_id": 17,
+      "state_id": 4,
+      "state_name": "Донецька область",
+      "district_name": "Покровський район"
+    },
+    {
+      "global_id": 18,
+      "state_id": 4,
+      "state_name": "Донецька область",
+      "district_name": "Краматорський район"
+    },
+    {
+      "global_id": 19,
+      "state_id": 4,
+      "state_name": "Донецька область",
+      "district_name": "Бахмутський район"
+    },
+    {
+      "global_id": 20,
+      "state_id": 4,
+      "state_name": "Донецька область",
+      "district_name": "Волноваський район"
+    },
+    {
+      "global_id": 21,
+      "state_id": 4,
+      "state_name": "Донецька область",
+      "district_name": "Маріупольський район"
+    },
+    {
+      "global_id": 22,
+      "state_id": 4,
+      "state_name": "Донецька область",
+      "district_name": "Донецький район"
+    },
+    {
+      "global_id": 23,
+      "state_id": 4,
+      "state_name": "Донецька область",
+      "district_name": "Кальміуський район"
+    },
+    {
+      "global_id": 24,
+      "state_id": 4,
+      "state_name": "Донецька область",
+      "district_name": "Горлівський район"
+    },
+    {
+      "global_id": 25,
+      "state_id": 5,
+      "state_name": "Житомирська область",
+      "district_name": "Бердичівський район"
+    },
+    {
+      "global_id": 26,
+      "state_id": 5,
+      "state_name": "Житомирська область",
+      "district_name": "Житомирський район"
+    },
+    {
+      "global_id": 27,
+      "state_id": 5,
+      "state_name": "Житомирська область",
+      "district_name": "Звягельський район"
+    },
+    {
+      "global_id": 28,
+      "state_id": 5,
+      "state_name": "Житомирська область",
+      "district_name": "Коростенський район"
+    },
+    {
+      "global_id": 29,
+      "state_id": 6,
+      "state_name": "Закарпатська область",
+      "district_name": "Ужгородський район"
+    },
+    {
+      "global_id": 30,
+      "state_id": 6,
+      "state_name": "Закарпатська область",
+      "district_name": "Берегівський район"
+    },
+    {
+      "global_id": 31,
+      "state_id": 6,
+      "state_name": "Закарпатська область",
+      "district_name": "Тячівський район"
+    },
+    {
+      "global_id": 32,
+      "state_id": 6,
+      "state_name": "Закарпатська область",
+      "district_name": "Хустський район"
+    },
+    {
+      "global_id": 33,
+      "state_id": 6,
+      "state_name": "Закарпатська область",
+      "district_name": "Рахівський район"
+    },
+    {
+      "global_id": 34,
+      "state_id": 6,
+      "state_name": "Закарпатська область",
+      "district_name": "Мукачівський район"
+    },
+    {
+      "global_id": 35,
+      "state_id": 7,
+      "state_name": "Запорізька область",
+      "district_name": "Бердянський район"
+    },
+    {
+      "global_id": 36,
+      "state_id": 7,
+      "state_name": "Запорізька область",
+      "district_name": "Запорізький район"
+    },
+    {
+      "global_id": 37,
+      "state_id": 7,
+      "state_name": "Запорізька область",
+      "district_name": "Пологівський район"
+    },
+    {
+      "global_id": 38,
+      "state_id": 7,
+      "state_name": "Запорізька область",
+      "district_name": "Василівський район"
+    },
+    {
+      "global_id": 39,
+      "state_id": 7,
+      "state_name": "Запорізька область",
+      "district_name": "Мелітопольський район"
+    },
+    {
+      "global_id": 40,
+      "state_id": 8,
+      "state_name": "Івано-Франківська область",
+      "district_name": "Верховинський район"
+    },
+    {
+      "global_id": 41,
+      "state_id": 8,
+      "state_name": "Івано-Франківська область",
+      "district_name": "Івано-Франківський район"
+    },
+    {
+      "global_id": 42,
+      "state_id": 8,
+      "state_name": "Івано-Франківська область",
+      "district_name": "Калуський район"
+    },
+    {
+      "global_id": 43,
+      "state_id": 8,
+      "state_name": "Івано-Франківська область",
+      "district_name": "Надвірнянський район"
+    },
+    {
+      "global_id": 44,
+      "state_id": 8,
+      "state_name": "Івано-Франківська область",
+      "district_name": "Коломийський район"
+    },
+    {
+      "global_id": 45,
+      "state_id": 8,
+      "state_name": "Івано-Франківська область",
+      "district_name": "Косівський район"
+    },
+    {
+      "global_id": 46,
+      "state_id": 9,
+      "state_name": "Київська область",
+      "district_name": "Броварський район"
+    },
+    {
+      "global_id": 47,
+      "state_id": 9,
+      "state_name": "Київська область",
+      "district_name": "Фастівський район"
+    },
+    {
+      "global_id": 48,
+      "state_id": 9,
+      "state_name": "Київська область",
+      "district_name": "Бучанський район"
+    },
+    {
+      "global_id": 49,
+      "state_id": 9,
+      "state_name": "Київська область",
+      "district_name": "Білоцерківський район"
+    },
+    {
+      "global_id": 50,
+      "state_id": 9,
+      "state_name": "Київська область",
+      "district_name": "Обухівський район"
+    },
+    {
+      "global_id": 51,
+      "state_id": 9,
+      "state_name": "Київська область",
+      "district_name": "Бориспільський район"
+    },
+    {
+      "global_id": 52,
+      "state_id": 9,
+      "state_name": "Київська область",
+      "district_name": "Вишгородський район"
+    },
+    {
+      "global_id": 53,
+      "state_id": 10,
+      "state_name": "Кіровоградська область",
+      "district_name": "Кропивницький район"
+    },
+    {
+      "global_id": 54,
+      "state_id": 10,
+      "state_name": "Кіровоградська область",
+      "district_name": "Голованівський район"
+    },
+    {
+      "global_id": 55,
+      "state_id": 10,
+      "state_name": "Кіровоградська область",
+      "district_name": "Олександрійський район"
+    },
+    {
+      "global_id": 56,
+      "state_id": 10,
+      "state_name": "Кіровоградська область",
+      "district_name": "Новоукраїнський район"
+    },
+    {
+      "global_id": 57,
+      "state_id": 12,
+      "state_name": "Львівська область",
+      "district_name": "Червоноградський район"
+    },
+    {
+      "global_id": 58,
+      "state_id": 12,
+      "state_name": "Львівська область",
+      "district_name": "Львівський район"
+    },
+    {
+      "global_id": 59,
+      "state_id": 12,
+      "state_name": "Львівська область",
+      "district_name": "Самбірський район"
+    },
+    {
+      "global_id": 60,
+      "state_id": 12,
+      "state_name": "Львівська область",
+      "district_name": "Дрогобицький район"
+    },
+    {
+      "global_id": 61,
+      "state_id": 12,
+      "state_name": "Львівська область",
+      "district_name": "Золочівський район"
+    },
+    {
+      "global_id": 62,
+      "state_id": 12,
+      "state_name": "Львівська область",
+      "district_name": "Стрийський район"
+    },
+    {
+      "global_id": 63,
+      "state_id": 12,
+      "state_name": "Львівська область",
+      "district_name": "Яворівський район"
+    },
+    {
+      "global_id": 64,
+      "state_id": 13,
+      "state_name": "Миколаївська область",
+      "district_name": "Первомайський район"
+    },
+    {
+      "global_id": 65,
+      "state_id": 13,
+      "state_name": "Миколаївська область",
+      "district_name": "Баштанський район"
+    },
+    {
+      "global_id": 66,
+      "state_id": 13,
+      "state_name": "Миколаївська область",
+      "district_name": "Миколаївський район"
+    },
+    {
+      "global_id": 67,
+      "state_id": 13,
+      "state_name": "Миколаївська область",
+      "district_name": "Вознесенський район"
+    },
+    {
+      "global_id": 68,
+      "state_id": 14,
+      "state_name": "Одеська область",
+      "district_name": "Одеський район"
+    },
+    {
+      "global_id": 69,
+      "state_id": 14,
+      "state_name": "Одеська область",
+      "district_name": "Подільський район"
+    },
+    {
+      "global_id": 70,
+      "state_id": 14,
+      "state_name": "Одеська область",
+      "district_name": "Березівський район"
+    },
+    {
+      "global_id": 71,
+      "state_id": 14,
+      "state_name": "Одеська область",
+      "district_name": "Болградський район"
+    },
+    {
+      "global_id": 72,
+      "state_id": 14,
+      "state_name": "Одеська область",
+      "district_name": "Білгород-Дністровський район"
+    },
+    {
+      "global_id": 73,
+      "state_id": 14,
+      "state_name": "Одеська область",
+      "district_name": "Роздільнянський район"
+    },
+    {
+      "global_id": 74,
+      "state_id": 14,
+      "state_name": "Одеська область",
+      "district_name": "Ізмаїльський район"
+    },
+    {
+      "global_id": 75,
+      "state_id": 15,
+      "state_name": "Полтавська область",
+      "district_name": "Полтавський район"
+    },
+    {
+      "global_id": 76,
+      "state_id": 15,
+      "state_name": "Полтавська область",
+      "district_name": "Миргородський район"
+    },
+    {
+      "global_id": 77,
+      "state_id": 15,
+      "state_name": "Полтавська область",
+      "district_name": "Кременчуцький район"
+    },
+    {
+      "global_id": 78,
+      "state_id": 15,
+      "state_name": "Полтавська область",
+      "district_name": "Лубенський район"
+    },
+    {
+      "global_id": 79,
+      "state_id": 16,
+      "state_name": "Рівненська область",
+      "district_name": "Вараський район"
+    },
+    {
+      "global_id": 80,
+      "state_id": 16,
+      "state_name": "Рівненська область",
+      "district_name": "Рівненський район"
+    },
+    {
+      "global_id": 81,
+      "state_id": 16,
+      "state_name": "Рівненська область",
+      "district_name": "Сарненський район"
+    },
+    {
+      "global_id": 82,
+      "state_id": 16,
+      "state_name": "Рівненська область",
+      "district_name": "Дубенський район"
+    },
+    {
+      "global_id": 83,
+      "state_id": 17,
+      "state_name": "Сумська область",
+      "district_name": "Роменський район"
+    },
+    {
+      "global_id": 84,
+      "state_id": 17,
+      "state_name": "Сумська область",
+      "district_name": "Сумський район"
+    },
+    {
+      "global_id": 85,
+      "state_id": 17,
+      "state_name": "Сумська область",
+      "district_name": "Шосткинський район"
+    },
+    {
+      "global_id": 86,
+      "state_id": 17,
+      "state_name": "Сумська область",
+      "district_name": "Охтирський район"
+    },
+    {
+      "global_id": 87,
+      "state_id": 17,
+      "state_name": "Сумська область",
+      "district_name": "Конотопський район"
+    },
+    {
+      "global_id": 88,
+      "state_id": 18,
+      "state_name": "Тернопільська область",
+      "district_name": "Тернопільський район"
+    },
+    {
+      "global_id": 89,
+      "state_id": 18,
+      "state_name": "Тернопільська область",
+      "district_name": "Чортківський район"
+    },
+    {
+      "global_id": 90,
+      "state_id": 18,
+      "state_name": "Тернопільська область",
+      "district_name": "Кременецький район"
+    },
+    {
+      "global_id": 91,
+      "state_id": 19,
+      "state_name": "Харківська область",
+      "district_name": "Ізюмський район"
+    },
+    {
+      "global_id": 92,
+      "state_id": 19,
+      "state_name": "Харківська область",
+      "district_name": "Харківський район"
+    },
+    {
+      "global_id": 93,
+      "state_id": 19,
+      "state_name": "Харківська область",
+      "district_name": "Лозівський район"
+    },
+    {
+      "global_id": 94,
+      "state_id": 19,
+      "state_name": "Харківська область",
+      "district_name": "Богодухівський район"
+    },
+    {
+      "global_id": 95,
+      "state_id": 19,
+      "state_name": "Харківська область",
+      "district_name": "Куп'янський район"
+    },
+    {
+      "global_id": 96,
+      "state_id": 19,
+      "state_name": "Харківська область",
+      "district_name": "Чугуївський район"
+    },
+    {
+      "global_id": 97,
+      "state_id": 19,
+      "state_name": "Харківська область",
+      "district_name": "Берестинський район"
+    },
+    {
+      "global_id": 98,
+      "state_id": 20,
+      "state_name": "Херсонська область",
+      "district_name": "Каховський район"
+    },
+    {
+      "global_id": 99,
+      "state_id": 20,
+      "state_name": "Херсонська область",
+      "district_name": "Бериславський район"
+    },
+    {
+      "global_id": 100,
+      "state_id": 20,
+      "state_name": "Херсонська область",
+      "district_name": "Скадовський район"
+    },
+    {
+      "global_id": 101,
+      "state_id": 20,
+      "state_name": "Херсонська область",
+      "district_name": "Херсонський район"
+    },
+    {
+      "global_id": 102,
+      "state_id": 20,
+      "state_name": "Херсонська область",
+      "district_name": "Генічеський район"
+    },
+    {
+      "global_id": 103,
+      "state_id": 21,
+      "state_name": "Хмельницька область",
+      "district_name": "Хмельницький район"
+    },
+    {
+      "global_id": 104,
+      "state_id": 21,
+      "state_name": "Хмельницька область",
+      "district_name": "Шепетівський район"
+    },
+    {
+      "global_id": 105,
+      "state_id": 21,
+      "state_name": "Хмельницька область",
+      "district_name": "Кам'янець-Подільський район"
+    },
+    {
+      "global_id": 106,
+      "state_id": 22,
+      "state_name": "Черкаська область",
+      "district_name": "Уманський район"
+    },
+    {
+      "global_id": 107,
+      "state_id": 22,
+      "state_name": "Черкаська область",
+      "district_name": "Черкаський район"
+    },
+    {
+      "global_id": 108,
+      "state_id": 22,
+      "state_name": "Черкаська область",
+      "district_name": "Звенигородський район"
+    },
+    {
+      "global_id": 109,
+      "state_id": 22,
+      "state_name": "Черкаська область",
+      "district_name": "Золотоніський район"
+    },
+    {
+      "global_id": 110,
+      "state_id": 23,
+      "state_name": "Чернівецька область",
+      "district_name": "Вижницький район"
+    },
+    {
+      "global_id": 111,
+      "state_id": 23,
+      "state_name": "Чернівецька область",
+      "district_name": "Чернівецький район"
+    },
+    {
+      "global_id": 112,
+      "state_id": 23,
+      "state_name": "Чернівецька область",
+      "district_name": "Дністровський район"
+    },
+    {
+      "global_id": 113,
+      "state_id": 24,
+      "state_name": "Чернігівська область",
+      "district_name": "Ніжинський район"
+    },
+    {
+      "global_id": 114,
+      "state_id": 24,
+      "state_name": "Чернігівська область",
+      "district_name": "Чернігівський район"
+    },
+    {
+      "global_id": 115,
+      "state_id": 24,
+      "state_name": "Чернігівська область",
+      "district_name": "Прилуцький район"
+    },
+    {
+      "global_id": 116,
+      "state_id": 24,
+      "state_name": "Чернігівська область",
+      "district_name": "Новгород-Сіверський район"
+    },
+    {
+      "global_id": 117,
+      "state_id": 24,
+      "state_name": "Чернігівська область",
+      "district_name": "Корюківський район"
+    }
+  ]
+}

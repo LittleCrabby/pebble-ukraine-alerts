@@ -1,0 +1,56 @@
+{
+  "name": "ukraine_alerts_map",
+  "author": "crabby-dev",
+  "version": "1.0.0",
+  "keywords": [
+    "pebble-app"
+  ],
+  "private": true,
+  "scripts": {
+    "test": "make -C tests && node --test tests/pkjs/*_test.js"
+  },
+  "dependencies": {},
+  "pebble": {
+    "displayName": "Ukraine Alerts",
+    "uuid": "fa5b3270-d299-4dc0-a92f-fdb54b02b589",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "emery",
+      "gabbro"
+    ],
+    "watchapp": {
+      "watchface": false
+    },
+    "messageKeys": {
+      "STATUS_CODE": 10000,
+      "ALERT_REGIONS_MASK": 10001,
+      "DISTRICT_ALERTS_MASK": 10002,
+      "ACTIVE_COUNT": 10003,
+      "ACTIVE_DISTRICT_COUNT": 10004,
+      "TIMESTAMP": 10005,
+      "SUMMARY_TEXT": 10006,
+      "USER_LOCATION_VALID": 10007,
+      "USER_LOCATION_X": 10008,
+      "USER_LOCATION_Y": 10009,
+      "REGION_DURATIONS": 10010
+    },
+    "resources": {
+      "media": [
+        {
+          "type": "bitmap",
+          "name": "IMAGE_MENU_ICON",
+          "file": "images/menu_icon.png",
+          "menuIcon": true
+        },
+        {
+          "type": "font",
+          "name": "FONT_CYRILLIC_15",
+          "file": "fonts/carlito.ttf",
+          "extended": true,
+          "characterRegex": "[\\u0020-\\u007E\\u00A0-\\u00FF\\u0100-\\u017F\\u0400-\\u045F\\u0490\\u0491\\u2019\\u2022]"
+        }
+      ]
+    }
+  }
+}
