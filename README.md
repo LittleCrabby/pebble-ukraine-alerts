@@ -112,6 +112,12 @@ Run the complete test suite (both native C unit tests with Pebble mocks and PKJS
 npm test
 ```
 
+### CI/CD & Releases
+
+This project uses [GitHub Actions](.github/workflows/ci.yml) for automated testing and builds:
+- **CI**: On every push and pull request to `main`, unit tests are executed and the `.pbw` binary is built and uploaded as a downloadable artifact.
+- **Releases**: Pushing a tag formatted as `v*` (e.g. `v1.0.0`) automatically compiles the `.pbw` file, creates a GitHub Release, and attaches both `ukraine_alerts_map.pbw` and `ukraine_alerts_map-vX.Y.Z.pbw`. Releases can also be dispatched manually via GitHub Actions' *Run workflow* tab.
+
 ---
 
 ## Data Sources
