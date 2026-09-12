@@ -84,8 +84,8 @@ jobs:
       - name: Upload PBW Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ukraine_alerts_map.pbw
-          path: build/ukraine_alerts_map.pbw
+          name: pebble-ukraine-alerts.pbw
+          path: build/pebble-ukraine-alerts.pbw
           if-no-files-found: error
           retention-days: 14
 
@@ -105,7 +105,7 @@ jobs:
       - name: Download built PBW artifact
         uses: actions/download-artifact@v4
         with:
-          name: ukraine_alerts_map.pbw
+          name: pebble-ukraine-alerts.pbw
           path: build
 
       - name: Determine Release Tag
@@ -120,9 +120,9 @@ jobs:
             TAG="v${VERSION}"
           fi
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
-          
+
           # Create a versioned copy of the pbw asset
-          cp build/ukraine_alerts_map.pbw "build/ukraine_alerts_map-${TAG}.pbw"
+          cp build/pebble-ukraine-alerts.pbw "build/ukraine_alerts_map-${TAG}.pbw"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -130,7 +130,7 @@ jobs:
           tag_name: ${{ steps.release_meta.outputs.tag }}
           name: Ukraine Alerts Map ${{ steps.release_meta.outputs.tag }}
           files: |
-            build/ukraine_alerts_map.pbw
+            build/pebble-ukraine-alerts.pbw
             build/ukraine_alerts_map-${{ steps.release_meta.outputs.tag }}.pbw
           generate_release_notes: true
           draft: false
