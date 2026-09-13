@@ -122,7 +122,7 @@ jobs:
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
           # Create a versioned copy of the pbw asset
-          cp build/pebble-ukraine-alerts.pbw "build/ukraine_alerts_map-${TAG}.pbw"
+          cp build/pebble-ukraine-alerts.pbw "build/pebble-ukraine-alerts-${TAG}.pbw"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -130,8 +130,7 @@ jobs:
           tag_name: ${{ steps.release_meta.outputs.tag }}
           name: Ukraine Alerts Map ${{ steps.release_meta.outputs.tag }}
           files: |
-            build/pebble-ukraine-alerts.pbw
-            build/ukraine_alerts_map-${{ steps.release_meta.outputs.tag }}.pbw
+            build/pebble-ukraine-alerts-${{ steps.release_meta.outputs.tag }}.pbw
           generate_release_notes: true
           draft: false
           prerelease: false
