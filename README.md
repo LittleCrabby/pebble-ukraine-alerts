@@ -1,8 +1,17 @@
 # Ukraine Alerts Map for Pebble
 
+[![CI & Release](https://github.com/LittleCrabby/pebble-ukraine-alerts/actions/workflows/ci.yml/badge.svg)](https://github.com/LittleCrabby/pebble-ukraine-alerts/actions/workflows/ci.yml)
+[![Rebble Appstore](https://img.shields.io/badge/Rebble_Appstore-Ukraine_Alerts-FF4757?logo=pebble&logoColor=white)](https://apps.repebble.com/90b69a2d24954ae184433c85)
+[![GitHub Release](https://img.shields.io/github/v/release/LittleCrabby/pebble-ukraine-alerts?color=blue&label=release)](https://github.com/LittleCrabby/pebble-ukraine-alerts/releases)
+[![Platforms](https://img.shields.io/badge/platforms-emery%20%7C%20gabbro-orange)](https://github.com/LittleCrabby/pebble-ukraine-alerts)
+
 A real-time air raid alert map and situational awareness watchapp for Pebble smartwatches, visualizing active alerts across all regions and districts of Ukraine.
 
 Built in C using the Pebble SDK with an accompanying PebbleKit JS (PKJS) companion service.
+
+[![Ukraine Alerts on Rebble Appstore](https://apps.repebble.com/og/90b69a2d24954ae184433c85.png)](https://apps.repebble.com/90b69a2d24954ae184433c85)
+
+> 📲 **Install on your Pebble:** [Download from Rebble Appstore](https://apps.repebble.com/90b69a2d24954ae184433c85)
 
 ---
 
