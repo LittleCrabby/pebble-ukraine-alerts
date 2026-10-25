@@ -37,7 +37,8 @@ static void map_window_update_banner(int region_id, int district_id) {
     bool is_full_alert = (region_id >= 0) && alert_model_is_region_full_alert(region_id);
     if (is_dist_alert || is_full_alert) {
       strncpy(s_banner_status, i18n_get(I18N_ALERT), sizeof(s_banner_status) - 1);
-      s_banner_status_color = COLOR_ALERT_FULL;
+      AlertLevel lvl = alert_model_get_district_alert_level(district_id);
+      s_banner_status_color = alert_model_get_level_color(lvl);
     } else {
       strncpy(s_banner_status, i18n_get(I18N_CALM), sizeof(s_banner_status) - 1);
       s_banner_status_color = GColorDarkGreen;
@@ -48,10 +49,12 @@ static void map_window_update_banner(int region_id, int district_id) {
 
     if (alert_model_is_region_full_alert(region_id)) {
       strncpy(s_banner_status, i18n_get(I18N_ALERT), sizeof(s_banner_status) - 1);
-      s_banner_status_color = COLOR_ALERT_FULL;
+      AlertLevel lvl = alert_model_get_region_alert_level(region_id);
+      s_banner_status_color = alert_model_get_level_color(lvl);
     } else if (alert_model_is_region_partial_alert(region_id)) {
       strncpy(s_banner_status, i18n_get(I18N_DISTRICT_ALERT), sizeof(s_banner_status) - 1);
-      s_banner_status_color = COLOR_ALERT_FULL;
+      AlertLevel lvl = alert_model_get_region_alert_level(region_id);
+      s_banner_status_color = alert_model_get_level_color(lvl);
     } else {
       strncpy(s_banner_status, i18n_get(I18N_CALM), sizeof(s_banner_status) - 1);
       s_banner_status_color = GColorDarkGreen;

@@ -94,12 +94,77 @@ static void test_alert_model_user_location(void) {
   assert(st->has_user_location == false);
 }
 
+static void test_alert_model_levels(void) {
+  alert_model_init();
+
+  // Test colors
+  assert(alert_model_get_level_color(ALERT_LEVEL_NONE) == COLOR_MAP_BASE);
+  assert(alert_model_get_level_color(ALERT_LEVEL_YELLOW) == COLOR_ALERT_YELLOW);
+  assert(alert_model_get_level_color(ALERT_LEVEL_ORANGE) == COLOR_ALERT_ORANGE);
+  assert(alert_model_get_level_color(ALERT_LEVEL_RED) == COLOR_ALERT_RED);
+
+  // Set up district levels
+  // District 0: Yellow (1) -> bits 0..1 = 1
+  // District 1: Orange (2) -> bits 2..3 = 2 (0b10 << 2 = 8)
+  // District 2: Red (3)    -> bits 4..5 = 3 (0b11 << 4 = 48)
+  // Byte 0 = 1 | 8 | 48 = 57
+  uint8_t dist_levels[DISTRICT_LEVELS_BYTES];
+  memset(dist_levels, 0, sizeof(dist_levels));
+  dist_levels[0] = 1 | (2 << 2) | (3 << 4);
+
+  alert_model_set_district_levels(dist_levels, sizeof(dist_levels));
+
+  assert(alert_model_get_district_alert_level(0) == ALERT_LEVEL_YELLOW);
+  assert(alert_model_get_district_alert_level(1) == ALERT_LEVEL_ORANGE);
+  assert(alert_model_get_district_alert_level(2) == ALERT_LEVEL_RED);
+  assert(alert_model_get_district_alert_level(3) == ALERT_LEVEL_NONE);
+
+  // Set region level: Region 1 = Orange (2)
+  uint8_t reg_levels[REGION_LEVELS_BYTES];
+  memset(reg_levels, 0, sizeof(reg_levels));
+  reg_levels[0] = (2 << 2); // region 1: bits 2..3
+  alert_model_set_region_levels(reg_levels, sizeof(reg_levels));
+  assert(alert_model_get_region_alert_level(1) == ALERT_LEVEL_ORANGE);
+
+  // If region 1 is full alert, districts belonging to region 1 inherit region 1's level
+  // Find a district in region 1
+  int dist_in_reg1 = -1;
+  for (int d = 0; d < GEO_TOTAL_DISTRICTS; d++) {
+    const DistrictGeoInfo *dg = geo_model_get_district(d);
+    if (dg && dg->region_id == 1 && d > 2) {
+      dist_in_reg1 = d;
+      break;
+    }
+  }
+  assert(dist_in_reg1 >= 0);
+
+  // Before full alert on region 1, dist_in_reg1 has no alert
+  assert(alert_model_get_district_alert_level(dist_in_reg1) == ALERT_LEVEL_NONE);
+
+  // Put region 1 in full alert
+  uint32_t rmask = (1UL << 1);
+  alert_model_update(rmask, NULL, 1, 0, "Region 1 alert");
+  assert(alert_model_is_region_full_alert(1) == true);
+  // Now dist_in_reg1 inherits region 1's level (ALERT_LEVEL_ORANGE)
+  assert(alert_model_get_district_alert_level(dist_in_reg1) == ALERT_LEVEL_ORANGE);
+
+  // Test fallback: if district mask is set but district_levels was 0, it falls back to RED
+  alert_model_init();
+  uint8_t dmask[DISTRICT_MASK_BYTES];
+  memset(dmask, 0, sizeof(dmask));
+  dmask[0] = (1 << 5); // district 5 alerted
+  alert_model_update(0, dmask, 1, 1, "Fallback test");
+  assert(alert_model_is_district_alert(5) == true);
+  assert(alert_model_get_district_alert_level(5) == ALERT_LEVEL_RED);
+}
+
 int main(void) {
   printf("Running test_alert_model...\n");
   test_alert_model_init();
   test_alert_model_full_vs_partial();
   test_alert_model_durations();
   test_alert_model_user_location();
+  test_alert_model_levels();
   printf("test_alert_model: ALL PASSED\n");
   return 0;
 }

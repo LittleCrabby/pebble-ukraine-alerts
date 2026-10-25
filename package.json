@@ -1,7 +1,7 @@
 {
   "name": "ukraine_alerts",
   "author": "crabby-dev",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "keywords": [
     "pebble-app"
   ],
@@ -33,7 +33,9 @@
       "USER_LOCATION_VALID": 10007,
       "USER_LOCATION_X": 10008,
       "USER_LOCATION_Y": 10009,
-      "REGION_DURATIONS": 10010
+      "REGION_DURATIONS": 10010,
+      "DISTRICT_ALERT_LEVELS": 10011,
+      "REGION_ALERT_LEVELS": 10012
     },
     "resources": {
       "media": [

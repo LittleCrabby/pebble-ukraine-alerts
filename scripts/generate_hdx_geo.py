@@ -23,9 +23,8 @@ states = mapping['states']
 
 def get_state_id(adm1_name):
     adm1 = adm1_name.strip()
-    if 'Крим' in adm1: return 0
-    if 'Севастополь' in adm1: return 1
-    if 'Київ' == adm1: return 26
+    if 'Крим' in adm1 or 'Севастополь' in adm1: return 0
+    if 'Київ' == adm1: return 25
     for idx, s in enumerate(states):
         core = s.replace(' область', '').replace('м. ', '').strip()
         if core in adm1:
@@ -62,9 +61,9 @@ for f in hdx['features']:
     dname = p.get('adm2_name1') or ''
     cd = clean(dname)
     
-    if sid == 10 and 'чорнобиль' in cd:
-        # Merge Chornobyl zone into Vyshhorodskyi (gid=45)
-        gid = 45
+    if sid == 9 and 'чорнобиль' in cd:
+        # Merge Chornobyl zone into Vyshhorodskyi (gid=52)
+        gid = 52
         matched_name = 'Вишгородський район'
     elif (sid, cd) in map_dict:
         gid, matched_name = map_dict[(sid, cd)]

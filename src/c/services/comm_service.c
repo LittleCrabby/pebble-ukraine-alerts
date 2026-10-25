@@ -13,6 +13,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   Tuple *loc_x_tuple = dict_find(iterator, MESSAGE_KEY_USER_LOCATION_X);
   Tuple *loc_y_tuple = dict_find(iterator, MESSAGE_KEY_USER_LOCATION_Y);
   Tuple *durations_tuple = dict_find(iterator, MESSAGE_KEY_REGION_DURATIONS);
+  Tuple *dist_levels_tuple = dict_find(iterator, MESSAGE_KEY_DISTRICT_ALERT_LEVELS);
+  Tuple *reg_levels_tuple = dict_find(iterator, MESSAGE_KEY_REGION_ALERT_LEVELS);
   
   bool state_updated = false;
 
@@ -26,6 +28,16 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   
   if (durations_tuple) {
     alert_model_set_region_durations(durations_tuple->value->data, durations_tuple->length);
+    state_updated = true;
+  }
+  
+  if (dist_levels_tuple) {
+    alert_model_set_district_levels(dist_levels_tuple->value->data, dist_levels_tuple->length);
+    state_updated = true;
+  }
+
+  if (reg_levels_tuple) {
+    alert_model_set_region_levels(reg_levels_tuple->value->data, reg_levels_tuple->length);
     state_updated = true;
   }
   

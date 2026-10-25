@@ -60,7 +60,8 @@ static void rebuild_menu_items(void) {
     bool is_dist = (dist_id >= 0) && alert_model_is_district_alert(dist_id);
 
     if (is_full || is_dist) {
-      s_user_color = COLOR_ALERT_FULL;
+      AlertLevel lvl = is_dist ? alert_model_get_district_alert_level(dist_id) : alert_model_get_region_alert_level(reg_id);
+      s_user_color = alert_model_get_level_color(lvl);
       uint16_t dur = (reg_id >= 0) ? alert_model_get_region_duration(reg_id) : 0xFFFF;
       char dur_str[16] = "";
       format_duration(dur, dur_str, sizeof(dur_str));
@@ -189,15 +190,16 @@ static void menu_draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuI
       char dur_str[16] = "";
       format_duration(dur, dur_str, sizeof(dur_str));
 
+      AlertLevel reg_lvl = alert_model_get_region_alert_level(row->region_id);
+      dot_color = alert_model_get_level_color(reg_lvl);
+
       if (row->is_full) {
-        dot_color = COLOR_ALERT_FULL;
         if (strlen(dur_str) > 0) {
           snprintf(sub_buf, sizeof(sub_buf), i18n_get(I18N_ENTIRE_REGION_DUR_FMT), dur_str);
         } else {
           strncpy(sub_buf, i18n_get(I18N_ENTIRE_REGION), sizeof(sub_buf) - 1);
         }
       } else {
-        dot_color = GColorOrange;
         if (strlen(dur_str) > 0) {
           snprintf(sub_buf, sizeof(sub_buf), i18n_get(I18N_DISTS_DUR_FMT), (int)row->active_dists, dur_str);
         } else {

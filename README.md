@@ -18,10 +18,12 @@ Built in C using the Pebble SDK with an accompanying PebbleKit JS (PKJS) compani
 ## Features
 
 - **On-Device Vector Map Rendering**: Custom scanline rasterizer renders vector polygons directly on Pebble hardware for all oblasts and districts.
-- **Hierarchical Alert Status**:
+- **Hierarchical Threat Levels & Colors**:
   - 🟢 **Calm**: No active sirens recorded in region.
-  - 🟡 **Partial / District Alert**: Alert triggered in specific raions (rendered with striped fill and border highlights).
-  - 🔴 **Full Alert**: Entire oblast under active alert.
+  - 🟡 **Yellow Alert**: Caution / localized alert level (rendered in yellow).
+  - 🟠 **Orange Alert**: Elevated danger level (rendered in orange).
+  - 🔴 **Red Alert**: High danger air raid alert (rendered in red).
+  - Both whole oblasts and individual districts are rendered with solid polygon fills matching their specific threat level.
 - **GPS Location & "My Safety"**: Translates phone GPS coordinates onto Ukraine's map grid, displays a current location pin, and prioritizes local danger status.
 - **Interactive Map Controls**:
   - **1.0x – 4.0x Zoom**: Up/Down buttons or auto-focusing on selected areas.

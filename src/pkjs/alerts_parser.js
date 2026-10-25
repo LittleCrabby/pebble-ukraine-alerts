@@ -36,6 +36,28 @@ function getDurationMinutes(isoString, nowMs) {
   return diffMin > 65534 ? 65534 : diffMin;
 }
 
+function getAlertLevelCode(alertLevelStr, isEnabled) {
+  if (!isEnabled) return 0; // ALERT_LEVEL_NONE
+  if (!alertLevelStr) return 3; // ALERT_LEVEL_RED (default for active alert)
+  var s = String(alertLevelStr).toLowerCase();
+  if (s === 'yellow') return 1;
+  if (s === 'orange') return 2;
+  if (s === 'red') return 3;
+  return 3;
+}
+
+function set2BitLevel(array, index, level) {
+  var byteIdx = Math.floor(index / 4);
+  var shift = (index % 4) * 2;
+  array[byteIdx] = (array[byteIdx] & ~(0x03 << shift)) | ((level & 0x03) << shift);
+}
+
+function get2BitLevel(array, index) {
+  var byteIdx = Math.floor(index / 4);
+  var shift = (index % 4) * 2;
+  return (array[byteIdx] >> shift) & 0x03;
+}
+
 function parseAlertsData(data, mapping, nowMs, userLocation) {
   if (!data) data = {};
   var statesData = data.states || {};
@@ -44,6 +66,12 @@ function parseAlertsData(data, mapping, nowMs, userLocation) {
   var regionMask = 0;
   var districtMask = [];
   for (var b = 0; b < 16; b++) districtMask[b] = 0;
+
+  var districtLevels = [];
+  for (var b = 0; b < 32; b++) districtLevels[b] = 0;
+
+  var regionLevels = [];
+  for (var b = 0; b < 8; b++) regionLevels[b] = 0;
 
   var activeStateCount = 0;
   var activeDistCount = 0;
@@ -64,11 +92,15 @@ function parseAlertsData(data, mapping, nowMs, userLocation) {
       // Merged Crimea: check both "АР Крим" and "Севастополь"
       var crimeaObj = statesData['АР Крим'];
       var sevObj = statesData['Севастополь'] || statesData["Севастополь'"];
-      var cActive = !!(crimeaObj && crimeaObj.enabled);
-      var sActive = !!(sevObj && sevObj.enabled);
+      var cActive = !!(crimeaObj && (crimeaObj.enabled || crimeaObj.alertnow));
+      var sActive = !!(sevObj && (sevObj.enabled || sevObj.alertnow));
       isStateActive = cActive || sActive;
 
       if (isStateActive) {
+        var cLvl = cActive ? getAlertLevelCode(crimeaObj ? crimeaObj.alert_level : null, true) : 0;
+        var sLvl = sActive ? getAlertLevelCode(sevObj ? sevObj.alert_level : null, true) : 0;
+        set2BitLevel(regionLevels, 0, Math.max(cLvl, sLvl));
+
         if (cActive && crimeaObj.enabled_at) {
           dur = getDurationMinutes(crimeaObj.enabled_at, currentMs);
         }
@@ -80,9 +112,13 @@ function parseAlertsData(data, mapping, nowMs, userLocation) {
         }
       }
     } else if (sObj) {
-      isStateActive = !!sObj.enabled;
-      if (isStateActive && sObj.enabled_at) {
-        dur = getDurationMinutes(sObj.enabled_at, currentMs);
+      isStateActive = !!(sObj.enabled || sObj.alertnow);
+      if (isStateActive) {
+        var sLvl = getAlertLevelCode(sObj.alert_level, true);
+        set2BitLevel(regionLevels, sIdx, sLvl);
+        if (sObj.enabled_at) {
+          dur = getDurationMinutes(sObj.enabled_at, currentMs);
+        }
       }
     }
 
@@ -102,11 +138,15 @@ function parseAlertsData(data, mapping, nowMs, userLocation) {
     var stObj = statesData[dMeta.state_name];
     if (stObj && stObj.districts) {
       var dObj = stObj.districts[dMeta.district_name];
-      if (dObj && dObj.enabled) {
+      if (dObj && (dObj.enabled || dObj.alertnow)) {
         var byteIdx = Math.floor(dIdx / 8);
         var bitIdx = dIdx % 8;
         districtMask[byteIdx] |= (1 << bitIdx);
         activeDistCount++;
+
+        var dLvl = getAlertLevelCode(dObj.alert_level, true);
+        set2BitLevel(districtLevels, dIdx, dLvl);
+
         if (!(regionMask & (1 << dMeta.state_id))) {
           if (!(partialRegionMask & (1 << dMeta.state_id))) {
             partialRegionMask |= (1 << dMeta.state_id);
@@ -123,7 +163,24 @@ function parseAlertsData(data, mapping, nowMs, userLocation) {
               regionDurations[stOffset + 1] = (distDur >> 8) & 0xFF;
             }
           }
+          // Update partial region's level to maximum of its active districts
+          var curRegLvl = get2BitLevel(regionLevels, dMeta.state_id);
+          if (dLvl > curRegLvl) {
+            set2BitLevel(regionLevels, dMeta.state_id, dLvl);
+          }
         }
+      }
+    }
+  }
+
+  // Ensure districts in fully alerted regions inherit the region's level
+  for (var dIdx = 0; dIdx < districtList.length; dIdx++) {
+    var dMeta = districtList[dIdx];
+    if (regionMask & (1 << dMeta.state_id)) {
+      var rLvl = get2BitLevel(regionLevels, dMeta.state_id);
+      var curDLvl = get2BitLevel(districtLevels, dIdx);
+      if (rLvl > curDLvl) {
+        set2BitLevel(districtLevels, dIdx, rLvl);
       }
     }
   }
@@ -144,7 +201,9 @@ function parseAlertsData(data, mapping, nowMs, userLocation) {
     'USER_LOCATION_VALID': userLocation ? 1 : 0,
     'USER_LOCATION_X': userLocation ? userLocation.x : 0,
     'USER_LOCATION_Y': userLocation ? userLocation.y : 0,
-    'REGION_DURATIONS': regionDurations
+    'REGION_DURATIONS': regionDurations,
+    'DISTRICT_ALERT_LEVELS': districtLevels,
+    'REGION_ALERT_LEVELS': regionLevels
   };
 }
 
@@ -152,5 +211,8 @@ module.exports = {
   UKRAINE_BOUNDS: UKRAINE_BOUNDS,
   normalizeCoordinates: normalizeCoordinates,
   getDurationMinutes: getDurationMinutes,
+  getAlertLevelCode: getAlertLevelCode,
+  set2BitLevel: set2BitLevel,
+  get2BitLevel: get2BitLevel,
   parseAlertsData: parseAlertsData
 };

@@ -32,6 +32,50 @@ bool alert_model_is_district_alert(uint8_t district_global_id) {
   return (s_state.district_mask[byte_idx] & (1 << bit_idx)) != 0;
 }
 
+AlertLevel alert_model_get_district_alert_level(uint8_t district_global_id) {
+  if (district_global_id >= GEO_TOTAL_DISTRICTS) return ALERT_LEVEL_NONE;
+
+  const DistrictGeoInfo *dg = geo_model_get_district(district_global_id);
+  if (dg && alert_model_is_region_full_alert(dg->region_id)) {
+    return alert_model_get_region_alert_level(dg->region_id);
+  }
+
+  uint8_t byte_idx = district_global_id / 4;
+  uint8_t shift = (district_global_id % 4) * 2;
+  if (byte_idx >= DISTRICT_LEVELS_BYTES) return ALERT_LEVEL_NONE;
+  AlertLevel lvl = (AlertLevel)((s_state.district_levels[byte_idx] >> shift) & 0x03);
+  if (lvl == ALERT_LEVEL_NONE && alert_model_is_district_alert(district_global_id)) {
+    return ALERT_LEVEL_RED;
+  }
+  return lvl;
+}
+
+AlertLevel alert_model_get_region_alert_level(uint8_t region_id) {
+  if (region_id >= REGION_MASK_COUNT) return ALERT_LEVEL_NONE;
+
+  uint8_t byte_idx = region_id / 4;
+  uint8_t shift = (region_id % 4) * 2;
+  if (byte_idx >= REGION_LEVELS_BYTES) return ALERT_LEVEL_NONE;
+  AlertLevel lvl = (AlertLevel)((s_state.region_levels[byte_idx] >> shift) & 0x03);
+  if (lvl == ALERT_LEVEL_NONE && alert_model_is_region_full_alert(region_id)) {
+    return ALERT_LEVEL_RED;
+  }
+  return lvl;
+}
+
+GColor alert_model_get_level_color(AlertLevel level) {
+  switch (level) {
+    case ALERT_LEVEL_RED:
+      return COLOR_ALERT_RED;
+    case ALERT_LEVEL_ORANGE:
+      return COLOR_ALERT_ORANGE;
+    case ALERT_LEVEL_YELLOW:
+      return COLOR_ALERT_YELLOW;
+    default:
+      return COLOR_MAP_BASE;
+  }
+}
+
 uint16_t alert_model_get_region_duration(uint8_t region_id) {
   if (region_id >= REGION_MASK_COUNT) return 0xFFFF;
   return s_state.region_durations[region_id];
@@ -84,5 +128,29 @@ void alert_model_set_region_durations(const uint8_t *data, size_t len) {
   if (count > REGION_MASK_COUNT) count = REGION_MASK_COUNT;
   for (size_t i = 0; i < count; i++) {
     s_state.region_durations[i] = (uint16_t)data[i * 2] | ((uint16_t)data[i * 2 + 1] << 8);
+  }
+}
+
+void alert_model_set_district_levels(const uint8_t *data, size_t len) {
+  if (!data) {
+    memset(s_state.district_levels, 0, sizeof(s_state.district_levels));
+    return;
+  }
+  size_t count = len < DISTRICT_LEVELS_BYTES ? len : DISTRICT_LEVELS_BYTES;
+  memcpy(s_state.district_levels, data, count);
+  if (count < DISTRICT_LEVELS_BYTES) {
+    memset(s_state.district_levels + count, 0, DISTRICT_LEVELS_BYTES - count);
+  }
+}
+
+void alert_model_set_region_levels(const uint8_t *data, size_t len) {
+  if (!data) {
+    memset(s_state.region_levels, 0, sizeof(s_state.region_levels));
+    return;
+  }
+  size_t count = len < REGION_LEVELS_BYTES ? len : REGION_LEVELS_BYTES;
+  memcpy(s_state.region_levels, data, count);
+  if (count < REGION_LEVELS_BYTES) {
+    memset(s_state.region_levels + count, 0, REGION_LEVELS_BYTES - count);
   }
 }

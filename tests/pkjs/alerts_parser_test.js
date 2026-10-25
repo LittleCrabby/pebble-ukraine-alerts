@@ -209,3 +209,54 @@ test('parseAlertsData handles Crimea / Sevastopol merging', function() {
   var dur = res.REGION_DURATIONS[0] | (res.REGION_DURATIONS[1] << 8);
   assert.strictEqual(dur, 45);
 });
+
+test('getAlertLevelCode correctly maps levels', function() {
+  assert.strictEqual(parser.getAlertLevelCode('red', true), 3);
+  assert.strictEqual(parser.getAlertLevelCode('RED', true), 3);
+  assert.strictEqual(parser.getAlertLevelCode('orange', true), 2);
+  assert.strictEqual(parser.getAlertLevelCode('yellow', true), 1);
+  assert.strictEqual(parser.getAlertLevelCode(null, true), 3);
+  assert.strictEqual(parser.getAlertLevelCode(undefined, true), 3);
+  assert.strictEqual(parser.getAlertLevelCode('unknown', true), 3);
+  assert.strictEqual(parser.getAlertLevelCode('red', false), 0);
+  assert.strictEqual(parser.getAlertLevelCode(null, false), 0);
+});
+
+test('parseAlertsData encodes threat levels for districts and regions', function() {
+  var nowMs = 1700000000000;
+  var dist0 = mapping.districts[0]; // Vinnytsia district in Vinnytsia oblast
+  var dist1 = mapping.districts[1]; // Mohyliv-Podilskyi district in Vinnytsia oblast
+
+  var mockData = {
+    states: {}
+  };
+  mockData.states[dist0.state_name] = {
+    enabled: false,
+    districts: {}
+  };
+  mockData.states[dist0.state_name].districts[dist0.district_name] = {
+    enabled: true,
+    alert_level: 'yellow'
+  };
+  mockData.states[dist0.state_name].districts[dist1.district_name] = {
+    enabled: true,
+    alert_level: 'orange'
+  };
+
+  var res = parser.parseAlertsData(mockData, mapping, nowMs, null);
+
+  assert(res.DISTRICT_ALERT_LEVELS);
+  assert.strictEqual(res.DISTRICT_ALERT_LEVELS.length, 32);
+  assert(res.REGION_ALERT_LEVELS);
+  assert.strictEqual(res.REGION_ALERT_LEVELS.length, 8);
+
+  // Check dist 0 is Yellow (1)
+  assert.strictEqual(parser.get2BitLevel(res.DISTRICT_ALERT_LEVELS, 0), 1);
+  // Check dist 1 is Orange (2)
+  assert.strictEqual(parser.get2BitLevel(res.DISTRICT_ALERT_LEVELS, 1), 2);
+  // Check district 2 is None (0)
+  assert.strictEqual(parser.get2BitLevel(res.DISTRICT_ALERT_LEVELS, 2), 0);
+
+  // State level should be max of its active districts -> Orange (2)
+  assert.strictEqual(parser.get2BitLevel(res.REGION_ALERT_LEVELS, dist0.state_id), 2);
+});

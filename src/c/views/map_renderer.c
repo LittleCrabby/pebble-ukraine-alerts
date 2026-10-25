@@ -103,15 +103,16 @@ void map_renderer_draw(GContext *ctx, const CameraState *cam, const AlertState *
     
     bool is_full = alerts && alert_model_is_region_full_alert(i);
     if (is_full) {
-      // Entire oblast in full alert: fill with solid dark red
-      draw_polygon(ctx, screen_pts, pt_count, COLOR_ALERT_FULL, false, cam->viewport);
+      AlertLevel lvl = alert_model_get_region_alert_level(i);
+      GColor fill_color = alert_model_get_level_color(lvl);
+      draw_polygon(ctx, screen_pts, pt_count, fill_color, false, cam->viewport);
     } else {
       // Calm or partially alerted oblast: fill with base green map color
       draw_polygon(ctx, screen_pts, pt_count, COLOR_MAP_BASE, false, cam->viewport);
     }
   }
   
-  // 1b. Stripe ONLY the specific districts where an alert is active (culled by bounding box)
+  // 1b. Fill ONLY the specific districts where an alert is active (culled by bounding box)
   if (alerts) {
     for (int d = 0; d < GEO_TOTAL_DISTRICTS; d++) {
       if (alert_model_is_district_alert(d)) {
@@ -126,7 +127,9 @@ void map_renderer_draw(GContext *ctx, const CameraState *cam, const AlertState *
           const GeoPoint *gp = &s_district_points[dist->start_point_idx + p];
           screen_pts[p] = geo_math_project(cam, gp->x, gp->y);
         }
-        draw_polygon(ctx, screen_pts, dpt_count, COLOR_ALERT_FULL, true, cam->viewport);
+        AlertLevel dist_lvl = alert_model_get_district_alert_level(d);
+        GColor dist_color = alert_model_get_level_color(dist_lvl);
+        draw_polygon(ctx, screen_pts, dpt_count, dist_color, false, cam->viewport);
       }
     }
   }
@@ -142,7 +145,10 @@ void map_renderer_draw(GContext *ctx, const CameraState *cam, const AlertState *
       bool alert_a = alerts && alert_model_is_district_alert(line->dist_a);
       bool alert_b = alerts && alert_model_is_district_alert(line->dist_b);
       if (alert_a || alert_b) {
-        graphics_context_set_stroke_color(ctx, COLOR_ALERT_FULL);
+        AlertLevel la = alert_a ? alert_model_get_district_alert_level(line->dist_a) : ALERT_LEVEL_NONE;
+        AlertLevel lb = alert_b ? alert_model_get_district_alert_level(line->dist_b) : ALERT_LEVEL_NONE;
+        AlertLevel max_lvl = (la > lb) ? la : lb;
+        graphics_context_set_stroke_color(ctx, alert_model_get_level_color(max_lvl));
       } else {
         graphics_context_set_stroke_color(ctx, GColorDarkGreen);
       }

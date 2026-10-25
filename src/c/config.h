@@ -29,8 +29,11 @@
 #define COLOR_BG GColorWhite
 #define COLOR_MAP_BASE GColorMayGreen
 #define COLOR_MAP_BORDER GColorDarkGray
-#define COLOR_ALERT_FULL GColorDarkCandyAppleRed
-#define COLOR_ALERT_PARTIAL GColorChromeYellow
+#define COLOR_ALERT_RED GColorDarkCandyAppleRed
+#define COLOR_ALERT_ORANGE GColorOrange
+#define COLOR_ALERT_YELLOW GColorChromeYellow
+#define COLOR_ALERT_FULL COLOR_ALERT_RED
+#define COLOR_ALERT_PARTIAL COLOR_ALERT_YELLOW
 #define COLOR_TEXT_DARK GColorBlack
 #define COLOR_TEXT_MUTED GColorDarkGray
 #define COLOR_ACCENT GColorCobaltBlue
@@ -38,3 +41,5 @@
 // Bitmask helpers
 #define REGION_MASK_COUNT 26
 #define DISTRICT_MASK_BYTES 16 // 128 bits for 118 districts
+#define DISTRICT_LEVELS_BYTES 32 // 128 2-bit entries for 118 districts
+#define REGION_LEVELS_BYTES 8    // 32 2-bit entries for 26 regions
