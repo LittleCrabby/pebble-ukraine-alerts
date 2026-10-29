@@ -1,5 +1,9 @@
 var mapping = require('./mapping.json');
 var parser = require('./alerts_parser.js');
+var mockAlerts = require('./mock_alerts.js');
+
+// Set to true only when capturing mock screenshots for store/testing
+var USE_MOCK_DATA = false;
 
 var API_URL = 'https://vadimklimenko.com/map/statuses.json';
 var FALLBACK_URL = 'http://ubilling.net.ua/aerialalerts/';
@@ -9,6 +13,10 @@ var userLocation = null;
 var lastAlertData = null;
 
 function updateUserLocation() {
+  if (USE_MOCK_DATA) {
+    userLocation = mockAlerts.MOCK_USER_LOCATION;
+    return;
+  }
   if (typeof navigator !== 'undefined' && navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       function(pos) {
@@ -87,6 +95,13 @@ function requestJson(url, callback) {
 }
 
 function fetchAlertData() {
+  if (USE_MOCK_DATA) {
+    userLocation = mockAlerts.MOCK_USER_LOCATION;
+    var mockData = mockAlerts.getMockAlertsData();
+    lastAlertData = mockData;
+    sendParsedAlerts(mockData);
+    return;
+  }
   updateUserLocation();
 
   requestJson(API_URL, function(err, data) {
