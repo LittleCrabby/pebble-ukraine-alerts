@@ -61,10 +61,13 @@ jobs:
         with:
           node-version: 24
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
       - name: Install Pebble Tool
         run: |
           python -m pip install --upgrade pip
-          pip install pebble-tool
+          pip install uv pebble-tool
 
       - name: Cache Pebble SDK
         id: cache-pebble-sdk
@@ -80,6 +83,7 @@ jobs:
       - name: Build Pebble App (.pbw)
         run: |
           pebble build
+          find build -maxdepth 1 -name "*.pbw" -exec cp {} build/pebble-ukraine-alerts.pbw \;
 
       - name: Upload PBW Artifact
         uses: actions/upload-artifact@v4
