@@ -45,6 +45,15 @@ typedef uint8_t GColor;
 #define GColorCobaltBlue 0x0A
 #define GColorOrange 0xF5
 
+typedef void* GFont;
+typedef void* ResHandle;
+#define RESOURCE_ID_FONT_CYRILLIC_15 1
+#define FONT_KEY_GOTHIC_14_BOLD "mock_font"
+static inline ResHandle resource_get_handle(uint32_t id) { (void)id; return (ResHandle)1; }
+static inline GFont fonts_load_custom_font(ResHandle h) { (void)h; return (GFont)1; }
+static inline void fonts_unload_custom_font(GFont f) { (void)f; }
+static inline GFont fonts_get_system_font(const char *key) { (void)key; return (GFont)1; }
+
 // Mock persistent storage
 extern int32_t g_mock_persist_val;
 extern bool g_mock_persist_exists;

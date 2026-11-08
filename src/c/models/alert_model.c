@@ -7,7 +7,6 @@ void alert_model_init(void) {
   memset(&s_state, 0, sizeof(AlertState));
   memset(s_state.region_durations, 0xFF, sizeof(s_state.region_durations));
   s_state.is_loaded = false;
-  strncpy(s_state.summary_text, "...", sizeof(s_state.summary_text) - 1);
 }
 
 AlertState* alert_model_get_state(void) {
@@ -81,7 +80,7 @@ uint16_t alert_model_get_region_duration(uint8_t region_id) {
   return s_state.region_durations[region_id];
 }
 
-void alert_model_update(uint32_t region_mask, const uint8_t *district_mask, uint8_t reg_count, uint8_t dist_count, const char *summary) {
+void alert_model_update(uint32_t region_mask, const uint8_t *district_mask, uint8_t reg_count, uint8_t dist_count) {
   s_state.region_mask = region_mask;
   if (district_mask) {
     memcpy(s_state.district_mask, district_mask, DISTRICT_MASK_BYTES);
@@ -109,10 +108,6 @@ void alert_model_update(uint32_t region_mask, const uint8_t *district_mask, uint
   s_state.active_region_count = reg_count;
   s_state.active_district_count = dist_count;
   s_state.last_update_time = time(NULL);
-  if (summary && strlen(summary) > 0) {
-    strncpy(s_state.summary_text, summary, sizeof(s_state.summary_text) - 1);
-    s_state.summary_text[sizeof(s_state.summary_text) - 1] = '\0';
-  }
   s_state.is_loaded = true;
 }
 

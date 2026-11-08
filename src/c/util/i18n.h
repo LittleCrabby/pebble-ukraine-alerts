@@ -50,6 +50,8 @@ typedef enum {
 } I18nKey;
 
 void i18n_init(void);
+void i18n_deinit(void);
+GFont i18n_get_font(void);
 AppLanguage i18n_get_selected_lang(void);
 AppLanguage i18n_get_effective_lang(void);
 void i18n_set_lang(AppLanguage lang);

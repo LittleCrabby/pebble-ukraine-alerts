@@ -9,6 +9,7 @@
 
 static Window *s_window;
 static Layer *s_map_layer;
+static Layer *s_clock_layer;
 static CameraState s_camera;
 static int s_selected_region = -1;
 static int s_selected_district = -1;
@@ -139,20 +140,9 @@ static void touch_handler(const TouchEvent *event, void *context) {
 }
 #endif
 
-static void map_layer_update_proc(Layer *layer, GContext *ctx) {
+static void clock_layer_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
 
-  // Clear background
-  graphics_context_set_fill_color(ctx, COLOR_BG);
-  graphics_fill_rect(ctx, bounds, 0, GCornerNone);
-
-  // Render map
-  AlertState *alerts = alert_model_get_state();
-  map_renderer_draw(ctx, &s_camera, alerts, s_selected_region, s_selected_district);
-
-  GFont font = s_font_cyrillic ? s_font_cyrillic : fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
-
-  // Top status bar: CURRENT TIME (Clock)
   time_t now = time(NULL);
   struct tm *t = localtime(&now);
   char time_str[16];
@@ -177,6 +167,20 @@ static void map_layer_update_proc(Layer *layer, GContext *ctx) {
   graphics_context_set_text_color(ctx, COLOR_TEXT_DARK);
   graphics_draw_text(ctx, time_str, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD),
                      time_rect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+}
+
+static void map_layer_update_proc(Layer *layer, GContext *ctx) {
+  GRect bounds = layer_get_bounds(layer);
+
+  // Clear background
+  graphics_context_set_fill_color(ctx, COLOR_BG);
+  graphics_fill_rect(ctx, bounds, 0, GCornerNone);
+
+  // Render map
+  AlertState *alerts = alert_model_get_state();
+  map_renderer_draw(ctx, &s_camera, alerts, s_selected_region, s_selected_district);
+
+  GFont font = s_font_cyrillic ? s_font_cyrillic : fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
 
   // Bottom banner: 2 lines (Line 1: Name, Line 2: Status)
   if (s_selected_region < 0 && s_selected_district < 0 && alerts && alerts->is_loaded) {
@@ -289,14 +293,142 @@ static void apply_zoom(int16_t new_zoom) {
   layer_mark_dirty(s_map_layer);
 }
 
+// Variant A Point-of-Interest Cycling Navigation
+static void cycle_active_districts(bool forward) {
+  if (s_selected_region < 0 || s_selected_region >= GEO_TOTAL_REGIONS) return;
+  
+  uint8_t match_districts[32];
+  int count = 0;
+  
+  // First, prefer districts that have an active alert
+  for (int d = 0; d < GEO_TOTAL_DISTRICTS; d++) {
+    const DistrictGeoInfo *dist = geo_model_get_district(d);
+    if (dist && dist->region_id == s_selected_region) {
+      if (alert_model_is_district_alert(d)) {
+        if (count < 32) match_districts[count++] = d;
+      }
+    }
+  }
+  
+  // If no specific district alert (e.g. whole region alert), include all districts in region
+  if (count == 0) {
+    for (int d = 0; d < GEO_TOTAL_DISTRICTS; d++) {
+      const DistrictGeoInfo *dist = geo_model_get_district(d);
+      if (dist && dist->region_id == s_selected_region) {
+        if (count < 32) match_districts[count++] = d;
+      }
+    }
+  }
+  
+  if (count == 0) return;
+  
+  int cur_idx = -1;
+  for (int i = 0; i < count; i++) {
+    if (match_districts[i] == s_selected_district) {
+      cur_idx = i;
+      break;
+    }
+  }
+  
+  int next_idx;
+  if (cur_idx < 0) {
+    next_idx = forward ? 0 : (count - 1);
+  } else {
+    next_idx = forward ? (cur_idx + 1) : (cur_idx - 1);
+    if (next_idx >= count) next_idx = 0;
+    if (next_idx < 0) next_idx = count - 1;
+  }
+  
+  int next_dist_id = match_districts[next_idx];
+  const DistrictGeoInfo *next_dist = geo_model_get_district(next_dist_id);
+  if (!next_dist) return;
+  
+  s_selected_district = next_dist_id;
+  if (s_camera.zoom_percent < 300) {
+    s_camera.zoom_percent = 300;
+  }
+  geo_math_center_on(&s_camera, next_dist->cx, next_dist->cy);
+  map_window_update_banner(s_selected_region, s_selected_district);
+  layer_mark_dirty(s_map_layer);
+}
+
+static void cycle_active_regions(bool forward) {
+  uint8_t match_regions[GEO_TOTAL_REGIONS];
+  int count = 0;
+  
+  for (int r = 0; r < GEO_TOTAL_REGIONS; r++) {
+    if (alert_model_get_region_alert_level(r) != ALERT_LEVEL_NONE) {
+      match_regions[count++] = r;
+    }
+  }
+  
+  if (count == 0) {
+    // If no active regions, cycle through all regions
+    for (int r = 0; r < GEO_TOTAL_REGIONS; r++) {
+      match_regions[count++] = r;
+    }
+  }
+  
+  int cur_idx = -1;
+  for (int i = 0; i < count; i++) {
+    if (match_regions[i] == s_selected_region) {
+      cur_idx = i;
+      break;
+    }
+  }
+  
+  int next_idx;
+  if (cur_idx < 0) {
+    next_idx = forward ? 0 : (count - 1);
+  } else {
+    next_idx = forward ? (cur_idx + 1) : (cur_idx - 1);
+    if (next_idx >= count) next_idx = 0;
+    if (next_idx < 0) next_idx = count - 1;
+  }
+  
+  map_window_focus_region(match_regions[next_idx]);
+}
+
 // Button Handlers
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
+  if (s_selected_region >= 0) {
+    if (alert_model_is_region_partial_alert(s_selected_region)) {
+      cycle_active_districts(true);
+    } else {
+      cycle_active_regions(true);
+    }
+  } else {
+    if (s_camera.zoom_percent == ZOOM_LEVEL_MIN) {
+      cycle_active_regions(true);
+    } else {
+      apply_zoom(s_camera.zoom_percent + ZOOM_STEP);
+    }
+  }
+}
+
+static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
+  if (s_selected_region >= 0) {
+    if (alert_model_is_region_partial_alert(s_selected_region)) {
+      cycle_active_districts(false);
+    } else {
+      cycle_active_regions(false);
+    }
+  } else {
+    if (s_camera.zoom_percent == ZOOM_LEVEL_MIN) {
+      cycle_active_regions(false);
+    } else {
+      apply_zoom(s_camera.zoom_percent - ZOOM_STEP);
+    }
+  }
+}
+
+static void up_long_click_handler(ClickRecognizerRef recognizer, void *context) {
   if (s_camera.zoom_percent < ZOOM_LEVEL_MAX) {
     apply_zoom(s_camera.zoom_percent + ZOOM_STEP);
   }
 }
 
-static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
+static void down_long_click_handler(ClickRecognizerRef recognizer, void *context) {
   if (s_camera.zoom_percent > ZOOM_LEVEL_MIN) {
     apply_zoom(s_camera.zoom_percent - ZOOM_STEP);
   }
@@ -307,21 +439,18 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 }
 
 static void back_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if (s_selected_region >= 0 || s_selected_district >= 0) {
-    s_selected_region = -1;
+  if (s_selected_district >= 0) {
     s_selected_district = -1;
-    s_banner_title[0] = '\0';
-    s_banner_status[0] = '\0';
-    layer_mark_dirty(s_map_layer);
+    if (s_selected_region >= 0) {
+      map_window_focus_region(s_selected_region);
+    } else {
+      map_window_update_banner(-1, -1);
+      layer_mark_dirty(s_map_layer);
+    }
     return;
   }
-  if (s_camera.zoom_percent > ZOOM_LEVEL_MIN || s_camera.pan_x != 0 || s_camera.pan_y != 0) {
-    geo_math_reset_camera(&s_camera, layer_get_bounds(s_map_layer));
-    s_selected_region = -1;
-    s_selected_district = -1;
-    s_banner_title[0] = '\0';
-    s_banner_status[0] = '\0';
-    layer_mark_dirty(s_map_layer);
+  if (s_selected_region >= 0 || s_camera.zoom_percent > ZOOM_LEVEL_MIN || s_camera.pan_x != 0 || s_camera.pan_y != 0) {
+    map_window_reset_view();
   } else {
     window_stack_pop(true);
   }
@@ -330,6 +459,8 @@ static void back_click_handler(ClickRecognizerRef recognizer, void *context) {
 static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
   window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
+  window_long_click_subscribe(BUTTON_ID_UP, 500, up_long_click_handler, NULL);
+  window_long_click_subscribe(BUTTON_ID_DOWN, 500, down_long_click_handler, NULL);
   window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
   window_single_click_subscribe(BUTTON_ID_BACK, back_click_handler);
 }
@@ -339,7 +470,7 @@ static void window_load(Window *window) {
   GRect bounds = layer_get_bounds(window_layer);
 
   geo_math_init_camera(&s_camera, bounds);
-  s_font_cyrillic = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_CYRILLIC_15));
+  s_font_cyrillic = i18n_get_font();
   strncpy(s_banner_title, i18n_get(I18N_UKRAINE), sizeof(s_banner_title) - 1);
   strncpy(s_banner_status, i18n_get(I18N_LOADING), sizeof(s_banner_status) - 1);
   s_banner_status_color = GColorDarkGreen;
@@ -347,6 +478,11 @@ static void window_load(Window *window) {
   s_map_layer = layer_create(bounds);
   layer_set_update_proc(s_map_layer, map_layer_update_proc);
   layer_add_child(window_layer, s_map_layer);
+
+  int16_t clock_h = SCREEN_IS_ROUND ? 40 : 28;
+  s_clock_layer = layer_create(GRect(0, 0, bounds.size.w, clock_h));
+  layer_set_update_proc(s_clock_layer, clock_layer_update_proc);
+  layer_add_child(window_layer, s_clock_layer);
 
 #if defined(PBL_TOUCH)
   app_touch_navigation_enable(true);
@@ -358,8 +494,9 @@ static void window_unload(Window *window) {
 #if defined(PBL_TOUCH)
   touch_service_unsubscribe();
 #endif
-  if (s_font_cyrillic) fonts_unload_custom_font(s_font_cyrillic);
+  layer_destroy(s_clock_layer);
   layer_destroy(s_map_layer);
+  s_font_cyrillic = NULL;
 }
 
 void map_window_init(void) {
@@ -379,6 +516,15 @@ void map_window_deinit(void) {
 void map_window_mark_dirty(void) {
   if (s_map_layer) {
     layer_mark_dirty(s_map_layer);
+  }
+  if (s_clock_layer) {
+    layer_mark_dirty(s_clock_layer);
+  }
+}
+
+void map_window_update_clock(void) {
+  if (s_clock_layer) {
+    layer_mark_dirty(s_clock_layer);
   }
 }
 

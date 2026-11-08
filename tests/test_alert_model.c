@@ -33,13 +33,12 @@ static void test_alert_model_full_vs_partial(void) {
   memset(dmask, 0, sizeof(dmask));
   dmask[0 / 8] |= (1 << (0 % 8));
 
-  alert_model_update(rmask, dmask, 2, 1, "Test Alert Summary");
+  alert_model_update(rmask, dmask, 2, 1);
 
   AlertState *st = alert_model_get_state();
   assert(st->is_loaded == true);
   assert(st->active_region_count == 2);
   assert(st->active_district_count == 1);
-  assert(strcmp(st->summary_text, "Test Alert Summary") == 0);
 
   // full_reg should be full alert, not partial
   assert(alert_model_is_region_full_alert(full_reg) == true);
@@ -55,7 +54,7 @@ static void test_alert_model_full_vs_partial(void) {
 
   // If full_reg is updated to also contain all districts, full_reg still reports full alert, not partial
   rmask |= (1UL << d0_reg);
-  alert_model_update(rmask, dmask, 2, 1, "Both Alerted");
+  alert_model_update(rmask, dmask, 2, 1);
   assert(alert_model_is_region_full_alert(d0_reg) == true);
   assert(alert_model_is_region_partial_alert(d0_reg) == false);
 }
@@ -143,7 +142,7 @@ static void test_alert_model_levels(void) {
 
   // Put region 1 in full alert
   uint32_t rmask = (1UL << 1);
-  alert_model_update(rmask, NULL, 1, 0, "Region 1 alert");
+  alert_model_update(rmask, NULL, 1, 0);
   assert(alert_model_is_region_full_alert(1) == true);
   // Now dist_in_reg1 inherits region 1's level (ALERT_LEVEL_ORANGE)
   assert(alert_model_get_district_alert_level(dist_in_reg1) == ALERT_LEVEL_ORANGE);
@@ -153,7 +152,7 @@ static void test_alert_model_levels(void) {
   uint8_t dmask[DISTRICT_MASK_BYTES];
   memset(dmask, 0, sizeof(dmask));
   dmask[0] = (1 << 5); // district 5 alerted
-  alert_model_update(0, dmask, 1, 1, "Fallback test");
+  alert_model_update(0, dmask, 1, 1);
   assert(alert_model_is_district_alert(5) == true);
   assert(alert_model_get_district_alert_level(5) == ALERT_LEVEL_RED);
 }

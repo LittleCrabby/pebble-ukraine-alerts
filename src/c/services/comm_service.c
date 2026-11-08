@@ -8,7 +8,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   Tuple *dist_mask_tuple = dict_find(iterator, MESSAGE_KEY_DISTRICT_ALERTS_MASK);
   Tuple *active_cnt_tuple = dict_find(iterator, MESSAGE_KEY_ACTIVE_COUNT);
   Tuple *dist_cnt_tuple = dict_find(iterator, MESSAGE_KEY_ACTIVE_DISTRICT_COUNT);
-  Tuple *summary_tuple = dict_find(iterator, MESSAGE_KEY_SUMMARY_TEXT);
   Tuple *loc_valid_tuple = dict_find(iterator, MESSAGE_KEY_USER_LOCATION_VALID);
   Tuple *loc_x_tuple = dict_find(iterator, MESSAGE_KEY_USER_LOCATION_X);
   Tuple *loc_y_tuple = dict_find(iterator, MESSAGE_KEY_USER_LOCATION_Y);
@@ -46,7 +45,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     const uint8_t *dmask = dist_mask_tuple ? dist_mask_tuple->value->data : NULL;
     uint8_t reg_count = active_cnt_tuple ? (uint8_t)active_cnt_tuple->value->int32 : 0;
     uint8_t dist_count = dist_cnt_tuple ? (uint8_t)dist_cnt_tuple->value->int32 : 0;
-    const char *summary = summary_tuple ? summary_tuple->value->cstring : "";
     
     // Check if new alert was added (only if already loaded, to avoid vibrating on app launch)
     AlertState *old_state = alert_model_get_state();
@@ -64,7 +62,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       }
     }
     
-    alert_model_update(rmask, dmask, reg_count, dist_count, summary);
+    alert_model_update(rmask, dmask, reg_count, dist_count);
     state_updated = true;
     
     if (new_alert) {
@@ -86,8 +84,8 @@ void comm_service_init(CommServiceUpdateHandler on_update) {
   app_message_register_inbox_received(inbox_received_callback);
   app_message_register_inbox_dropped(inbox_dropped_callback);
   
-  // 1024 inbox size for summary text, 128 outbox
-  app_message_open(1024, 128);
+  // Compact 256 inbox size (no string payloads), 64 outbox
+  app_message_open(256, 64);
 }
 
 void comm_service_deinit(void) {

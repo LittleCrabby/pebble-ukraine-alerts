@@ -18,7 +18,6 @@ typedef struct {
   uint8_t active_region_count;
   uint8_t active_district_count;
   time_t last_update_time;
-  char summary_text[512];
   bool is_loaded;
   bool has_user_location;
   uint16_t user_loc_x;
@@ -35,7 +34,7 @@ AlertLevel alert_model_get_district_alert_level(uint8_t district_global_id);
 AlertLevel alert_model_get_region_alert_level(uint8_t region_id);
 GColor alert_model_get_level_color(AlertLevel level);
 uint16_t alert_model_get_region_duration(uint8_t region_id);
-void alert_model_update(uint32_t region_mask, const uint8_t *district_mask, uint8_t reg_count, uint8_t dist_count, const char *summary);
+void alert_model_update(uint32_t region_mask, const uint8_t *district_mask, uint8_t reg_count, uint8_t dist_count);
 void alert_model_set_user_location(bool valid, uint16_t x, uint16_t y);
 void alert_model_set_region_durations(const uint8_t *data, size_t len);
 void alert_model_set_district_levels(const uint8_t *data, size_t len);

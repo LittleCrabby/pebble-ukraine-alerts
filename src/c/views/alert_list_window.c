@@ -303,7 +303,7 @@ static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
-  s_font_cyrillic = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_CYRILLIC_15));
+  s_font_cyrillic = i18n_get_font();
 
   rebuild_menu_items();
 
@@ -325,10 +325,7 @@ static void window_load(Window *window) {
 static void window_unload(Window *window) {
   menu_layer_destroy(s_menu_layer);
   s_menu_layer = NULL;
-  if (s_font_cyrillic) {
-    fonts_unload_custom_font(s_font_cyrillic);
-    s_font_cyrillic = NULL;
-  }
+  s_font_cyrillic = NULL;
 }
 
 void alert_list_window_init(void) {

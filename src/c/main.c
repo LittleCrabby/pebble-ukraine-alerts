@@ -11,7 +11,7 @@ static void on_data_updated(void) {
 }
 
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
-  map_window_mark_dirty();
+  map_window_update_clock();
 }
 
 static void init(void) {
@@ -33,6 +33,7 @@ static void deinit(void) {
   alert_list_window_deinit();
   map_window_deinit();
   comm_service_deinit();
+  i18n_deinit();
 }
 
 int main(void) {

@@ -1,7 +1,7 @@
 {
   "name": "ukraine_alerts",
   "author": "crabby-dev",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "keywords": [
     "pebble-app"
   ],
@@ -16,6 +16,8 @@
     "sdkVersion": "3",
     "enableMultiJS": true,
     "targetPlatforms": [
+      "basalt",
+      "chalk",
       "emery",
       "gabbro"
     ],
@@ -50,7 +52,7 @@
           "name": "FONT_CYRILLIC_15",
           "file": "fonts/carlito.ttf",
           "extended": true,
-          "characterRegex": "[\\u0020-\\u007E\\u00A0-\\u00FF\\u0100-\\u017F\\u0400-\\u045F\\u0490\\u0491\\u2019\\u2022]"
+          "characterRegex": "[\\u0020-\\u007E\\u00C0-\\u00FF\\u0400-\\u045F\\u0490\\u0491\\u2019\\u2022]"
         }
       ]
     }

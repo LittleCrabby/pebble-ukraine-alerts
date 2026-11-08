@@ -3,6 +3,21 @@
 #define PERSIST_KEY_LANGUAGE 100
 
 static AppLanguage s_selected_lang = LANG_AUTO;
+static GFont s_app_font = NULL;
+
+GFont i18n_get_font(void) {
+  if (!s_app_font) {
+    s_app_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_CYRILLIC_15));
+  }
+  return s_app_font ? s_app_font : fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
+}
+
+void i18n_deinit(void) {
+  if (s_app_font) {
+    fonts_unload_custom_font(s_app_font);
+    s_app_font = NULL;
+  }
+}
 
 // Strings table: [lang_index][key]
 // lang_index = effective_lang - 1 (0: EN, 1: UK, 2: FR, 3: DE, 4: ES, 5: IT, 6: PT)
@@ -378,29 +393,7 @@ void i18n_format_district_name(const char *src, char *dst, size_t dst_len) {
     dst[0] = '\0';
     return;
   }
-  AppLanguage lang = i18n_get_effective_lang();
-  if (lang == LANG_UK) {
-    strncpy(dst, src, dst_len - 1);
-    dst[dst_len - 1] = '\0';
-    size_t prefix_len;
-    if (str_ends_with(dst, " район", &prefix_len)) {
-      if (prefix_len + 8 < dst_len) {
-        dst[prefix_len] = '\0';
-        strcat(dst, " р-н");
-      }
-    }
-    // Clean trailing single quote if any
-    size_t len = strlen(dst);
-    if (len > 0 && dst[len - 1] == '\'') {
-      dst[len - 1] = '\0';
-    }
-    return;
-  }
 
-  // Western languages: transliterate Ukrainian Cyrillic to Latin
-  const char *suffix = (lang == LANG_DE) ? " Bez." : " dist.";
-
-  // Find where " район" or " р-н" begins to truncate before transliterating
   char src_clean[96];
   strncpy(src_clean, src, sizeof(src_clean) - 1);
   src_clean[sizeof(src_clean) - 1] = '\0';
@@ -409,6 +402,15 @@ void i18n_format_district_name(const char *src, char *dst, size_t dst_len) {
   if (str_ends_with(src_clean, " район", &prefix_len) || str_ends_with(src_clean, " р-н", &prefix_len)) {
     src_clean[prefix_len] = '\0';
   }
+
+  AppLanguage lang = i18n_get_effective_lang();
+  if (lang == LANG_UK) {
+    snprintf(dst, dst_len, "%s р-н", src_clean);
+    return;
+  }
+
+  // Western languages: transliterate Ukrainian Cyrillic to Latin
+  const char *suffix = (lang == LANG_DE) ? " Bez." : " dist.";
 
   size_t d_idx = 0;
   const uint8_t *p = (const uint8_t *)src_clean;

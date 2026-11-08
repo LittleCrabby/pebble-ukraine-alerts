@@ -1,10 +1,10 @@
 // Pure data parser and converter functions for Ukraine Alerts
 
 var UKRAINE_BOUNDS = {
-  MIN_LAT: 44.3,
-  MAX_LAT: 52.4,
-  MIN_LON: 22.0,
-  MAX_LON: 40.3
+  MIN_LAT: 44.386,
+  MAX_LAT: 52.379,
+  MIN_LON: 22.137,
+  MAX_LON: 40.228
 };
 
 function normalizeCoordinates(lat, lon) {

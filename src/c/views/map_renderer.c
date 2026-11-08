@@ -37,8 +37,6 @@ static void draw_polygon(GContext *ctx, const GPoint *pts, int count, GColor fil
   if (min_y > max_y) return;
   if (max_x < vp_left || min_x > vp_right) return;
   
-  graphics_context_set_stroke_color(ctx, fill_color);
-  
   for (int16_t y = min_y; y <= max_y; y++) {
     // For striped pattern, draw 3 scanlines on, 3 scanlines off
     if (striped && (y % 6 >= 3)) continue;
@@ -77,6 +75,7 @@ static void draw_polygon(GContext *ctx, const GPoint *pts, int count, GColor fil
         if (x1 < vp_left) x1 = vp_left;
         if (x2 > vp_right) x2 = vp_right;
         if (x1 <= x2) {
+          graphics_context_set_stroke_color(ctx, fill_color);
           graphics_draw_line(ctx, GPoint(x1, y), GPoint(x2, y));
         }
       }
@@ -84,31 +83,34 @@ static void draw_polygon(GContext *ctx, const GPoint *pts, int count, GColor fil
   }
 }
 
+static GPoint s_screen_pts[MAX_POLY_POINTS];
+
 void map_renderer_draw(GContext *ctx, const CameraState *cam, const AlertState *alerts, int selected_region_id, int selected_district_id) {
-  GPoint screen_pts[MAX_POLY_POINTS];
-  
   // 1. Fill oblast base polygons (culled by bounding box)
   for (int i = 0; i < GEO_TOTAL_REGIONS; i++) {
     const RegionGeoInfo *r = geo_model_get_region(i);
     if (!r) continue;
     if (!is_bbox_visible(cam, r->min_x, r->max_x, r->min_y, r->max_y)) continue;
     
-    int pt_count = r->num_points;
-    if (pt_count > MAX_POLY_POINTS) pt_count = MAX_POLY_POINTS;
-    
-    for (int p = 0; p < pt_count; p++) {
+    int pt_count = 0;
+    int max_p = r->num_points < MAX_POLY_POINTS ? r->num_points : MAX_POLY_POINTS;
+    for (int p = 0; p < max_p; p++) {
       const GeoPoint *gp = &s_region_points[r->start_point_idx + p];
-      screen_pts[p] = geo_math_project(cam, gp->x, gp->y);
+      GPoint pt = geo_math_project(cam, gp->x, gp->y);
+      if (pt_count > 0 && pt.x == s_screen_pts[pt_count - 1].x && pt.y == s_screen_pts[pt_count - 1].y) {
+        continue;
+      }
+      s_screen_pts[pt_count++] = pt;
     }
     
     bool is_full = alerts && alert_model_is_region_full_alert(i);
     if (is_full) {
       AlertLevel lvl = alert_model_get_region_alert_level(i);
       GColor fill_color = alert_model_get_level_color(lvl);
-      draw_polygon(ctx, screen_pts, pt_count, fill_color, false, cam->viewport);
+      draw_polygon(ctx, s_screen_pts, pt_count, fill_color, false, cam->viewport);
     } else {
       // Calm or partially alerted oblast: fill with base green map color
-      draw_polygon(ctx, screen_pts, pt_count, COLOR_MAP_BASE, false, cam->viewport);
+      draw_polygon(ctx, s_screen_pts, pt_count, COLOR_MAP_BASE, false, cam->viewport);
     }
   }
   
@@ -121,22 +123,25 @@ void map_renderer_draw(GContext *ctx, const CameraState *cam, const AlertState *
         if (alert_model_is_region_full_alert(dist->region_id)) continue;
         if (!is_bbox_visible(cam, dist->min_x, dist->max_x, dist->min_y, dist->max_y)) continue;
         
-        int dpt_count = dist->num_points;
-        if (dpt_count > MAX_POLY_POINTS) dpt_count = MAX_POLY_POINTS;
-        for (int p = 0; p < dpt_count; p++) {
+        int dpt_count = 0;
+        int max_p = dist->num_points < MAX_POLY_POINTS ? dist->num_points : MAX_POLY_POINTS;
+        for (int p = 0; p < max_p; p++) {
           const GeoPoint *gp = &s_district_points[dist->start_point_idx + p];
-          screen_pts[p] = geo_math_project(cam, gp->x, gp->y);
+          GPoint pt = geo_math_project(cam, gp->x, gp->y);
+          if (dpt_count > 0 && pt.x == s_screen_pts[dpt_count - 1].x && pt.y == s_screen_pts[dpt_count - 1].y) {
+            continue;
+          }
+          s_screen_pts[dpt_count++] = pt;
         }
         AlertLevel dist_lvl = alert_model_get_district_alert_level(d);
         GColor dist_color = alert_model_get_level_color(dist_lvl);
-        draw_polygon(ctx, screen_pts, dpt_count, dist_color, false, cam->viewport);
+        draw_polygon(ctx, s_screen_pts, dpt_count, dist_color, false, cam->viewport);
       }
     }
   }
   
   // 2. Draw internal district boundaries when zoomed in (>= 3.0x / 4.0x) - THIN 1px line (culled by bounding box)
   if (cam->zoom_percent >= 300) {
-    graphics_context_set_stroke_width(ctx, 1);
     for (int l = 0; l < GEO_TOTAL_DISTRICT_LINES; l++) {
       const DistrictInternalLine *line = geo_model_get_district_line(l);
       if (!line || line->num_points < 2) continue;
@@ -165,8 +170,6 @@ void map_renderer_draw(GContext *ctx, const CameraState *cam, const AlertState *
   }
   
   // 3. Draw standard oblast boundaries on top of district lines (culled by bounding box):
-  uint8_t oblast_stroke = (cam->zoom_percent >= 300) ? 3 : 1;
-  graphics_context_set_stroke_width(ctx, oblast_stroke);
   graphics_context_set_stroke_color(ctx, (cam->zoom_percent >= 300) ? GColorBlack : COLOR_MAP_BORDER);
   for (int i = 0; i < GEO_TOTAL_REGIONS; i++) {
     const RegionGeoInfo *r = geo_model_get_region(i);
@@ -189,7 +192,6 @@ void map_renderer_draw(GContext *ctx, const CameraState *cam, const AlertState *
   if (selected_district_id >= 0 && selected_district_id < GEO_TOTAL_DISTRICTS) {
     const DistrictGeoInfo *dist = geo_model_get_district(selected_district_id);
     if (dist && dist->num_points > 2) {
-      graphics_context_set_stroke_width(ctx, 3);
       graphics_context_set_stroke_color(ctx, GColorCobaltBlue);
       GPoint p0 = geo_math_project(cam, s_district_points[dist->start_point_idx].x,
                                         s_district_points[dist->start_point_idx].y);
@@ -205,7 +207,6 @@ void map_renderer_draw(GContext *ctx, const CameraState *cam, const AlertState *
   } else if (selected_region_id >= 0 && selected_region_id < GEO_TOTAL_REGIONS) {
     const RegionGeoInfo *r = geo_model_get_region(selected_region_id);
     if (r && r->num_points > 2) {
-      graphics_context_set_stroke_width(ctx, 3);
       graphics_context_set_stroke_color(ctx, GColorCobaltBlue);
       GPoint p0 = geo_math_project(cam, s_region_points[r->start_point_idx].x,
                                         s_region_points[r->start_point_idx].y);
@@ -220,23 +221,19 @@ void map_renderer_draw(GContext *ctx, const CameraState *cam, const AlertState *
     }
   }
   
-  // Reset stroke width to 1
-  graphics_context_set_stroke_width(ctx, 1);
-  
   // 5. User location marker (if available and within Ukraine)
   if (alerts && alerts->has_user_location) {
     GPoint up = geo_math_project(cam, alerts->user_loc_x, alerts->user_loc_y);
     int uradius = (cam->zoom_percent >= 300) ? 5 : 4;
     
     // Outer border & fill
-    graphics_context_set_stroke_color(ctx, GColorWhite);
-    graphics_context_set_stroke_width(ctx, 1);
     graphics_context_set_fill_color(ctx, GColorCobaltBlue);
-    graphics_fill_circle(ctx, up, uradius);
-    graphics_draw_circle(ctx, up, uradius);
+    graphics_fill_rect(ctx, GRect(up.x - uradius, up.y - uradius, uradius * 2 + 1, uradius * 2 + 1), 2, GCornersAll);
+    graphics_context_set_stroke_color(ctx, GColorWhite);
+    graphics_draw_round_rect(ctx, GRect(up.x - uradius, up.y - uradius, uradius * 2 + 1, uradius * 2 + 1), 2);
     
     // Inner white center pin
     graphics_context_set_fill_color(ctx, GColorWhite);
-    graphics_fill_circle(ctx, up, (uradius >= 5) ? 2 : 1);
+    graphics_fill_rect(ctx, GRect(up.x - 1, up.y - 1, 3, 3), 0, GCornerNone);
   }
 }

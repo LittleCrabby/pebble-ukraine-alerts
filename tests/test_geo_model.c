@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include "models/geo_model.h"
+#include "util/i18n.h"
 
 static void test_geo_model_accessors(void) {
   // Test region accessors
@@ -9,7 +10,7 @@ static void test_geo_model_accessors(void) {
     const RegionGeoInfo *r = geo_model_get_region(i);
     assert(r != NULL);
     assert(r->id == i);
-    assert(r->name != NULL);
+    assert(i18n_get_region_name(i) != NULL);
     assert(r->num_points > 0);
     assert(r->min_x <= r->max_x);
     assert(r->min_y <= r->max_y);

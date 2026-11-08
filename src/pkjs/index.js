@@ -11,12 +11,29 @@ var POLL_INTERVAL_MS = 15000;
 var pollTimer = null;
 var userLocation = null;
 var lastAlertData = null;
+var lastSentState = null;
+var lastSentLocationStr = '';
+var lastSentTime = 0;
+var lastLocationCheck = 0;
 
-function updateUserLocation() {
+function arraysEqual(a, b) {
+  if (!a || !b || a.length !== b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+function updateUserLocation(force) {
   if (USE_MOCK_DATA) {
     userLocation = mockAlerts.MOCK_USER_LOCATION;
     return;
   }
+  var now = Date.now();
+  if (!force && now - lastLocationCheck < 60000) {
+    return;
+  }
+  lastLocationCheck = now;
   if (typeof navigator !== 'undefined' && navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       function(pos) {
@@ -27,7 +44,7 @@ function updateUserLocation() {
             userLocation = norm;
             console.log('User location in Ukraine: lat=' + pos.coords.latitude + ', lon=' + pos.coords.longitude + ' -> normX=' + norm.x + ', normY=' + norm.y);
             if ((!prevLocation || prevLocation.x !== norm.x || prevLocation.y !== norm.y) && lastAlertData) {
-              sendParsedAlerts(lastAlertData);
+              sendParsedAlerts(lastAlertData, true);
             }
             return;
           }
@@ -35,7 +52,7 @@ function updateUserLocation() {
           if (userLocation !== null) {
             userLocation = null;
             if (lastAlertData) {
-              sendParsedAlerts(lastAlertData);
+              sendParsedAlerts(lastAlertData, true);
             }
           }
         }
@@ -48,8 +65,33 @@ function updateUserLocation() {
   }
 }
 
-function sendParsedAlerts(data) {
-  var dict = parser.parseAlertsData(data, mapping, Date.now(), userLocation);
+function sendParsedAlerts(data, force) {
+  var now = Date.now();
+  var dict = parser.parseAlertsData(data, mapping, now, userLocation);
+
+  // Exclude unused SUMMARY_TEXT from BLE payload to save bandwidth & memory
+  delete dict.SUMMARY_TEXT;
+
+  var locStr = userLocation ? (userLocation.x + ',' + userLocation.y) : 'null';
+  var stateChanged = (
+    !lastSentState ||
+    lastSentState.ALERT_REGIONS_MASK !== dict.ALERT_REGIONS_MASK ||
+    !arraysEqual(lastSentState.DISTRICT_ALERTS_MASK, dict.DISTRICT_ALERTS_MASK) ||
+    !arraysEqual(lastSentState.REGION_ALERT_LEVELS, dict.REGION_ALERT_LEVELS) ||
+    !arraysEqual(lastSentState.DISTRICT_ALERT_LEVELS, dict.DISTRICT_ALERT_LEVELS) ||
+    lastSentLocationStr !== locStr
+  );
+
+  var timeElapsed = (now - lastSentTime) >= 60000;
+
+  if (!force && !stateChanged && !timeElapsed) {
+    return; // Skip duplicate message to save watch CPU, RAM and battery
+  }
+
+  lastSentState = dict;
+  lastSentLocationStr = locStr;
+  lastSentTime = now;
+
   Pebble.sendAppMessage(dict, function() {
     console.log('Sent alert state to Pebble successfully: active=' + dict.ACTIVE_COUNT + ' dist=' + dict.ACTIVE_DISTRICT_COUNT + ' userLoc=' + (userLocation ? 'valid' : 'none'));
   }, function(e) {
@@ -94,26 +136,26 @@ function requestJson(url, callback) {
   xhr.send();
 }
 
-function fetchAlertData() {
+function fetchAlertData(force) {
   if (USE_MOCK_DATA) {
     userLocation = mockAlerts.MOCK_USER_LOCATION;
     var mockData = mockAlerts.getMockAlertsData();
     lastAlertData = mockData;
-    sendParsedAlerts(mockData);
+    sendParsedAlerts(mockData, force);
     return;
   }
-  updateUserLocation();
+  updateUserLocation(force);
 
   requestJson(API_URL, function(err, data) {
     if (!err && data) {
       lastAlertData = data;
-      sendParsedAlerts(data);
+      sendParsedAlerts(data, force);
     } else {
       console.log('Primary API failed (' + (err ? err.message : 'unknown') + '), trying fallback...');
       requestJson(FALLBACK_URL, function(fallbackErr, fallbackData) {
         if (!fallbackErr && fallbackData) {
           lastAlertData = fallbackData;
-          sendParsedAlerts(fallbackData);
+          sendParsedAlerts(fallbackData, force);
         } else {
           console.log('Fallback API also failed: ' + (fallbackErr ? fallbackErr.message : 'unknown'));
           if (!lastAlertData) {
@@ -127,8 +169,8 @@ function fetchAlertData() {
 
 Pebble.addEventListener('ready', function() {
   console.log('PebbleKit JS ready for Ukraine Alerts');
-  updateUserLocation();
-  fetchAlertData();
+  updateUserLocation(true);
+  fetchAlertData(true);
 
   if (pollTimer) clearInterval(pollTimer);
   pollTimer = setInterval(fetchAlertData, POLL_INTERVAL_MS);
@@ -136,5 +178,5 @@ Pebble.addEventListener('ready', function() {
 
 Pebble.addEventListener('appmessage', function(e) {
   console.log('AppMessage received from watch, refreshing data');
-  fetchAlertData();
+  fetchAlertData(true);
 });

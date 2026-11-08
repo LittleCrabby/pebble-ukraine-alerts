@@ -189,10 +189,7 @@ regions_meta = []
 
 for sid, sname in enumerate(states):
     f = obls_by_id.get(sid)
-    if sid == 1:
-        # Sevastopol
-        cleaned = [(6441, 9898), (6232, 9698), (6302, 9561), (6298, 9385), (6323, 9328), (6374, 9404), (6349, 9505), (6433, 9538), (6376, 9646), (6401, 9733), (6481, 9723), (6517, 9840), (6441, 9898)]
-    elif f:
+    if f:
         geom = f['geometry']
         coords = geom['coordinates']
         ring = coords[0] if geom['type'] == 'Polygon' else max(coords, key=lambda x: poly_area(x[0]))[0]
@@ -310,7 +307,7 @@ with open('src/c/models/geo_model.h', 'w', encoding='utf-8') as f:
     f.write(f'''#pragma once
 #include <pebble.h>
 
-#define GEO_TOTAL_REGIONS 27
+#define GEO_TOTAL_REGIONS {len(regions_meta)}
 #define GEO_TOTAL_DISTRICTS {len(district_meta)}
 #define GEO_TOTAL_DISTRICT_LINES {len(lines_meta)}
 #define GEO_COORD_MAX 10000
@@ -322,7 +319,6 @@ typedef struct {{
 
 typedef struct {{
   uint8_t id;
-  const char *name;
   uint16_t start_point_idx;
   uint16_t num_points;
   uint16_t min_x;
@@ -386,7 +382,7 @@ with open('src/c/models/geo_model.c', 'w', encoding='utf-8') as f:
     # s_regions
     f.write('const RegionGeoInfo s_regions[GEO_TOTAL_REGIONS] = {\n')
     for r in regions_meta:
-        f.write(f'  [{r["id"]}] = {{ .id = {r["id"]}, .name = "{r["name"]}", .start_point_idx = {r["start_idx"]}, .num_points = {r["num_points"]}, .min_x = {r["min_x"]}, .max_x = {r["max_x"]}, .min_y = {r["min_y"]}, .max_y = {r["max_y"]}, .cx = {r["cx"]}, .cy = {r["cy"]} }},\n')
+        f.write(f'  [{r["id"]}] = {{ .id = {r["id"]}, .start_point_idx = {r["start_idx"]}, .num_points = {r["num_points"]}, .min_x = {r["min_x"]}, .max_x = {r["max_x"]}, .min_y = {r["min_y"]}, .max_y = {r["max_y"]}, .cx = {r["cx"]}, .cy = {r["cy"]} }},\n')
     f.write('};\n\n')
 
     # s_district_points
@@ -399,7 +395,8 @@ with open('src/c/models/geo_model.c', 'w', encoding='utf-8') as f:
     # s_districts
     f.write('const DistrictGeoInfo s_districts[GEO_TOTAL_DISTRICTS] = {\n')
     for d in district_meta:
-        f.write(f'  [{d["global_id"]}] = {{ .global_id = {d["global_id"]}, .region_id = {d["region_id"]}, .name = "{d["name"]}", .cx = {d["cx"]}, .cy = {d["cy"]}, .start_point_idx = {d["start_idx"]}, .num_points = {d["num_points"]}, .min_x = {d["min_x"]}, .max_x = {d["max_x"]}, .min_y = {d["min_y"]}, .max_y = {d["max_y"]} }},\n')
+        clean_name = d["name"].replace(' район', '').replace(' р-н', '').strip()
+        f.write(f'  [{d["global_id"]}] = {{ .global_id = {d["global_id"]}, .region_id = {d["region_id"]}, .name = "{clean_name}", .cx = {d["cx"]}, .cy = {d["cy"]}, .start_point_idx = {d["start_idx"]}, .num_points = {d["num_points"]}, .min_x = {d["min_x"]}, .max_x = {d["max_x"]}, .min_y = {d["min_y"]}, .max_y = {d["max_y"]} }},\n')
     f.write('};\n\n')
 
     # s_district_line_points

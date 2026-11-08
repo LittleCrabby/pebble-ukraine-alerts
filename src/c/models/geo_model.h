@@ -13,7 +13,6 @@ typedef struct {
 
 typedef struct {
   uint8_t id;
-  const char *name;
   uint16_t start_point_idx;
   uint16_t num_points;
   uint16_t min_x;
